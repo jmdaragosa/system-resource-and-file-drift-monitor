@@ -5,11 +5,28 @@ import json
 from datetime import datetime
 
 def collect_metrics():
+	cpu = psutil.cpu_percent(interval=1)
+	memory = psutil.virtual_memory().percent
+	disk = psutil.disk_usage("/").percent
+
+	alerts = []
+
+	if cpu > 80:
+		alerts.append("High CPU usage")
+	if memory > 85:
+		alerts.append("High memory usage")
+	if disk > 90:
+		alerts.append("Disk almost full")
+	
+	if not alerts:
+		alerts.append("Everything ok.")
+	
 	return{
-		"timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-		"cpu_percentage": psutil.cpu_percent(interval=1),
-		"memory_percentage": psutil.virtual_memory().percent,
-		"disk_percent": psutil.disk_usage("/").percent
+		"timestamp": datetime.now().isoformat(),
+		"cpu_percentage": cpu,
+		"memory_percentage": memory,
+		"disk_percent": disk,
+		"alerts": alerts
 	}
 
 if __name__ == "__main__":
