@@ -3,6 +3,8 @@
 import psutil
 import json
 from datetime import datetime
+import time
+import os
 
 def collect_metrics():
 	cpu = psutil.cpu_percent(interval=1)
@@ -30,8 +32,11 @@ def collect_metrics():
 	}
 
 if __name__ == "__main__":
-	data = collect_metrics()
-	print(data)
+	while True:
+		data = collect_metrics()
+		os.system('clear')
+		print(data)
 
-	with open("metrics.json", "a") as file:
-		file.write(json.dumps(data) + "\n")
+		with open("metrics.json", "a") as file:
+			file.write(json.dumps(data) + "\n")
+		time.sleep(10)
