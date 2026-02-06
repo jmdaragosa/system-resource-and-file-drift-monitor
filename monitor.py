@@ -11,6 +11,16 @@ WATCH_PATHS = [
 	"/Users/jmdaragosa/Downloads"
 ]
 
+
+CPU_THRESHOLD = 80
+MEMORY_THRESHOLD = 85
+DISK_THRESHOLD = 90
+FILE_GROWTH_THRESHOLD_MB = 500
+
+
+previous_snapshots = {}
+
+
 def scan_directory(path):
 	total_size = 0
 	file_count = 0
@@ -30,7 +40,6 @@ def scan_directory(path):
 		"file_count": file_count
 	}
 
-previous_snapshots = {}
 
 def check_file_drift():
 	alerts = []
@@ -38,8 +47,8 @@ def check_file_drift():
 	for path in WATCH_PATHS:
 		snapshot = scan_directory(path)
 		prev_size = previous_snapshots.get(path, snapshot["total_size_mb"])
-		if snapshot["total_size_mb"] - prev_size > 500:
-			alerts.append(f"{path} grew more than 500MB")
+		if snapshot["total_size_mb"] - prev_size > FILE_GROWTH_THRESHOLD_MB:
+			alerts.append(f"{path} grew more than {FILE_GROWTH_THRESHOLD_MB}MB")
 		previous_snapshots[path] = snapshot["total_size_mb"]
 
 		return alerts
@@ -54,11 +63,11 @@ def collect_metrics():
 	# Alerts
 	alerts = []
 
-	if cpu > 80:
+	if cpu > CPU_THRESHOLD:
 		alerts.append("High CPU usage")
-	if memory > 85:
+	if memory > MEMORY_THRESHOLD:
 		alerts.append("High memory usage")
-	if disk > 90:
+	if disk > DISK_THRESHOLD:
 		alerts.append("Disk almost full")
 	
 	# File drift alerts
