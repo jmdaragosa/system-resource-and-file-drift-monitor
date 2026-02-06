@@ -1,2 +1,2 @@
 # system-resource-and-file-drift-monitor
-A beginner-friendly tool that monitors a system’s health and detects potential problems automatically, giving you insight into CPU, memory, disk, and important files over time.
+The system performs threshold-based anomaly detection for system resources and monitored directories, generating alerts when usage exceeds configured limits or when file growth exceeds expected bounds. 
