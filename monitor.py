@@ -47,11 +47,14 @@ def check_file_drift():
 	for path in WATCH_PATHS:
 		snapshot = scan_directory(path)
 
-		prev_size = previous_snapshots.get(path, snapshot["total_size_mb"])
+		prev_size = previous_snapshots.get(path, {"total_size_mb": snapshot["total_size_mb"]})["total_size_mb"]
 		if snapshot["total_size_mb"] - prev_size > FILE_GROWTH_THRESHOLD_MB:
 			alerts.append(f"{path} grew more than {FILE_GROWTH_THRESHOLD_MB}MB")
 
-		previous_snapshots[path] = snapshot["total_size_mb"]
+		previous_snapshots[path] = {
+			"timestamp":datetime.now().isoformat(),
+			"total_size_mb":snapshot["total_size_mb"]
+		}
 
 	return alerts
 
@@ -92,30 +95,33 @@ def collect_metrics():
 
 
 if __name__ == "__main__":
-	while True:
-		data = collect_metrics()
-		os.system('clear')
-		alerts = data["alerts"]
-		print("System Metrics:")
-		print(json.dumps(data, indent=2))
-		print("\nFile Snapshots:")
-		print(json.dumps(previous_snapshots, indent=2))
-		if alerts:
-			print("\nAlerts:")
-			for alert in alerts:
-				print(f"{alert}")
-		else:
-			print("Everything OK.")		
+	try:
+		while True:
+			data = collect_metrics()
+			os.system('clear')
+			alerts = data["alerts"]
+			print("System Metrics:")
+			print(json.dumps(data, indent=2))
+			print("\nFile Snapshots:")
+			print(json.dumps(previous_snapshots, indent=2))
+			if alerts:
+				print("\nAlerts:")
+				for alert in alerts:
+					print(f"{alert}")
+			else:
+				print("Everything OK.")		
 
-		with open("metrics.json", "a") as file:
-			file.write(json.dumps(data) + "\n")
+			with open("metrics.json", "a") as file:
+				file.write(json.dumps(data) + "\n")
 
-		snapshot_entry = {
-			"timestamp": datetime.now().isoformat(),
-			"paths": previous_snapshots 
-		}
+			snapshot_entry = {
+				"timestamp": datetime.now().isoformat(),
+				"paths": previous_snapshots 
+			}
 
-		with open("snapshots.json", "a") as file:
-			file.write(json.dumps(snapshot_entry) + "\n")
+			with open("snapshots.json", "a") as file:
+				file.write(json.dumps(snapshot_entry) + "\n")
 
-		time.sleep(5)
+			time.sleep(5)
+	except KeyboardInterrupt:
+			print("\nMonitoring stopped by user. Goodbye!")
