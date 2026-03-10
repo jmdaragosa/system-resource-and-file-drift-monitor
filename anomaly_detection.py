@@ -11,9 +11,22 @@ Z_THRESHOLD = 2.5
 MIN_POINTS = 5
 
 def make_history(window_size: int = WINDOW_SIZE):
+	"""
+	Create a new rolling history buffer (a deque) that automatically drops old values when it gets full.
+	"""
 	return deque(maxlen=window_size)
 
 def detect_anomaly(value, history, k: float = Z_THRESHOLD, min_points: int = MIN_POINTS):
+	"""
+	Statistical anomaly detection using rolling mean/std and z-score.
+
+	-value: current numeric reading (e.g., CPU%, growth in MB)
+	-history: deque containing previous readings
+
+	Returns:
+		(is_anomaly: bool, z-score: float)
+	"""
+	
 	# First, add the new value to history
 	history.append(value)
 
